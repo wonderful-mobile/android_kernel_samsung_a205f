@@ -22,7 +22,7 @@ export ANDROID_MAJOR_VERSION=11
 export ANDROID_PLATFORM_VERSION=11
 export PLATFORM_VERSION=11
 
-export CROSS_COMPILE=$PWD/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+export CROSS_COMPILE=$(pwd)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
 export LOCALVERSION="-Wonderful-${PROJECT_VERSION}-${DEVICE}"
 # ---------------------
 
@@ -58,11 +58,29 @@ fi
 
 # Build kernel
 echo "Starting build..."
-make -j"$JOBS" \
+echo ""
+
+LOG_FILE="$EXPORT_DIR/build.log"
+mkdir -p "$EXPORT_DIR"
+
+# First try parallel build
+if ! make -j1 \
      O="$BUILD_DIR" \
      ARCH="$ARCH" \
      HOSTCFLAGS="$HOSTCFLAGS" \
-     LOCALVERSION="$LOCALVERSION"
+     LOCALVERSION="$LOCALVERSION" \
+     2>&1 | tee "$LOG_FILE"; then
+
+    echo ""
+    echo "Parallel build failed. Retrying with -j1 for real error..."
+    echo ""
+
+    make -j1 \
+         O="$BUILD_DIR" \
+         ARCH="$ARCH" \
+         HOSTCFLAGS="$HOSTCFLAGS" \
+         LOCALVERSION="$LOCALVERSION"
+fi
 
 # Verify image
 if [[ ! -f "$IMAGE_SOURCE" ]]; then
