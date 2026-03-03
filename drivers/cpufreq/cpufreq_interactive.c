@@ -75,20 +75,18 @@ static spinlock_t speedchange_cpumask_lock;
 static struct mutex gov_lock;
 
 /* Target load.  Lower values result in higher CPU speeds. */
-#define DEFAULT_TARGET_LOAD 85
+#define DEFAULT_TARGET_LOAD 75
 static unsigned int default_target_loads[] = {
-	1000000, 70,
-	1200000, 65,
-	1400000, 60,
-	0, 75
+    1000000, 70,
+    1200000, 65,
+    1400000, 60,
+    0, 55
 };
 
 #define DEFAULT_TIMER_RATE (10 * USEC_PER_MSEC)
 /* #define DEFAULT_ABOVE_HISPEED_DELAY DEFAULT_TIMER_RATE */
-#define DEFAULT_ABOVE_HISPEED_DELAY (10 * USEC_PER_MSEC)
+#define DEFAULT_ABOVE_HISPEED_DELAY (8 * USEC_PER_MSEC)
 static unsigned int default_above_hispeed_delay[] = {
-    1300000, 5000,
-    1500000, 3000,
     0
 };
 // static unsigned int default_above_hispeed_delay[] = {
@@ -111,7 +109,7 @@ struct cpufreq_interactive_tunables {
 	 * The minimum amount of time to spend at a frequency before we can ramp
 	 * down.
 	 */
-#define DEFAULT_MIN_SAMPLE_TIME (20 * USEC_PER_MSEC)
+#define DEFAULT_MIN_SAMPLE_TIME (10 * USEC_PER_MSEC)
 	unsigned long min_sample_time;
 	/*
 	 * The sample rate of the timer used to increase frequency
@@ -450,6 +448,12 @@ static void cpufreq_interactive_timer(unsigned long data)
 #endif
 	loadadjfreq = (unsigned int)cputime_speedadj * 100;
 	cpu_load = loadadjfreq / pcpu->policy->cur;
+
+	if (cpu_load > 75) {
+		new_freq = pcpu->policy->max;
+		goto force_apply;
+	}
+
 	tunables->boosted = tunables->boost_val || now < tunables->boostpulse_endtime;
 
 	if (cpu_load >= tunables->go_hispeed_load || tunables->boosted) {
@@ -530,6 +534,7 @@ static void cpufreq_interactive_timer(unsigned long data)
 		goto rearm;
 	}
 
+	force_apply:
 	trace_cpufreq_interactive_target(data, cpu_load, pcpu->target_freq,
 					 pcpu->policy->cur, new_freq);
 
@@ -1423,13 +1428,13 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 		mutex_lock(&gov_lock);
 
 		freq_table = cpufreq_frequency_get_table(policy->cpu);
-		if (!tunables->hispeed_freq) {
-			if (policy->max == 1560000)
-				tunables->hispeed_freq = 1500000;
-			else if (policy->max == 1350000)
-				tunables->hispeed_freq = 1300000;
-		}
-			/* tunables->hispeed_freq = policy->max; */
+		// if (!tunables->hispeed_freq) {
+		// 	if (policy->max == 1560000)
+		// 		tunables->hispeed_freq = 1560000;
+		// 	else if (policy->max == 1350000)
+		// 		tunables->hispeed_freq = 1350000;
+		// }
+		tunables->hispeed_freq = policy->max; 
 
 		for_each_cpu(j, policy->cpus) {
 			pcpu = &per_cpu(cpuinfo, j);
