@@ -44,6 +44,19 @@ if [[ "$1" == "clean" ]]; then
     exit 0
 fi
 
+# menuconfig
+if [[ "$1" == "menuconfig" ]]; then
+    echo "Launching menuconfig..."
+    
+    # Ensure base config exists
+    if [[ ! -f ".config" ]]; then
+        make ARCH="$ARCH" HOSTCFLAGS="$HOSTCFLAGS" "$DEFCONFIG"
+    fi
+
+    make ARCH="$ARCH" menuconfig
+    exit 0
+fi
+
 # Create build directory
 mkdir -p "$BUILD_DIR"
 
