@@ -8,7 +8,7 @@ DEVICE="A205F"
 DEFCONFIG="exynos7885-a20_defconfig"
 ARCH="arm64"
 JOBS="$(nproc)"
-BUILD_DIR="$(pwd)"
+BUILD_DIR="$(pwd)/out/build"
 EXPORT_DIR="$(pwd)/out"
 HOSTCFLAGS="-fcommon"
 VARIENT="vanilla"
@@ -80,10 +80,10 @@ mkdir -p "$BUILD_DIR"
 # Generate defconfig (only if .config missing)
 if [[ ! -f "$BUILD_DIR/.config" || "$1" == "defconfig" ]]; then
     echo "Generating defconfig..."
-    make ARCH="$ARCH" HOSTCFLAGS="$HOSTCFLAGS" "$DEFCONFIG"
+    make O="$BUILD_DIR" ARCH="$ARCH" HOSTCFLAGS="$HOSTCFLAGS" "$DEFCONFIG"
 
     echo "Preparing kernel..."
-    make ARCH="$ARCH" prepare
+    make O="$BUILD_DIR" ARCH="$ARCH" prepare
 fi
 
 # Build kernel
@@ -95,6 +95,7 @@ mkdir -p "$EXPORT_DIR"
 
 # First try parallel build
 if ! make -j"$JOBS" \
+     O="$BUILD_DIR" \
      ARCH="$ARCH" \
      HOSTCFLAGS="$HOSTCFLAGS" \
      LOCALVERSION="$LOCALVERSION" \
@@ -105,6 +106,7 @@ if ! make -j"$JOBS" \
     echo ""
 
     make -j1 \
+         O="$BUILD_DIR" \
          ARCH="$ARCH" \
          HOSTCFLAGS="$HOSTCFLAGS" \
          LOCALVERSION="$LOCALVERSION"
