@@ -75,20 +75,33 @@ static spinlock_t speedchange_cpumask_lock;
 static struct mutex gov_lock;
 
 /* Target load.  Lower values result in higher CPU speeds. */
-#define DEFAULT_TARGET_LOAD 90
-static unsigned int default_target_loads[] = {DEFAULT_TARGET_LOAD};
+#define DEFAULT_TARGET_LOAD 85
+static unsigned int default_target_loads[] = {
+	1000000, 70,
+	1200000, 65,
+	1400000, 60,
+	0, 75
+};
 
-#define DEFAULT_TIMER_RATE (20 * USEC_PER_MSEC)
-#define DEFAULT_ABOVE_HISPEED_DELAY DEFAULT_TIMER_RATE
+#define DEFAULT_TIMER_RATE (10 * USEC_PER_MSEC)
+/* #define DEFAULT_ABOVE_HISPEED_DELAY DEFAULT_TIMER_RATE */
+#define DEFAULT_ABOVE_HISPEED_DELAY (10 * USEC_PER_MSEC)
 static unsigned int default_above_hispeed_delay[] = {
-	DEFAULT_ABOVE_HISPEED_DELAY };
+    1300000, 5000,
+    1500000, 3000,
+    0
+};
+// static unsigned int default_above_hispeed_delay[] = {
+// 	DEFAULT_ABOVE_HISPEED_DELAY };
 
 struct cpufreq_interactive_tunables {
 	int usage_count;
 	/* Hi speed to bump to from lo speed when load burst (default max) */
 	unsigned int hispeed_freq;
 	/* Go to hi speed when CPU load at or above this value. */
-#define DEFAULT_GO_HISPEED_LOAD 99
+/* #define DEFAULT_GO_HISPEED_LOAD 99 */
+/* dirty overclock :3 */
+#define DEFAULT_GO_HISPEED_LOAD 75 /* anything below 70 will just be a battery waste */
 	unsigned long go_hispeed_load;
 	/* Target load. Lower values result in higher CPU speeds. */
 	spinlock_t target_loads_lock;
@@ -98,7 +111,7 @@ struct cpufreq_interactive_tunables {
 	 * The minimum amount of time to spend at a frequency before we can ramp
 	 * down.
 	 */
-#define DEFAULT_MIN_SAMPLE_TIME (80 * USEC_PER_MSEC)
+#define DEFAULT_MIN_SAMPLE_TIME (20 * USEC_PER_MSEC)
 	unsigned long min_sample_time;
 	/*
 	 * The sample rate of the timer used to increase frequency
@@ -122,7 +135,7 @@ struct cpufreq_interactive_tunables {
 	 * Max additional time to wait in idle, beyond timer_rate, at speeds
 	 * above minimum before wakeup to reduce speed, or -1 if unnecessary.
 	 */
-#define DEFAULT_TIMER_SLACK (4 * DEFAULT_TIMER_RATE)
+#define DEFAULT_TIMER_SLACK (2 * DEFAULT_TIMER_RATE)
 	int timer_slack_val;
 	bool io_is_busy;
 
@@ -1329,8 +1342,9 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 			tunables->ntarget_loads = ARRAY_SIZE(default_target_loads);
 			tunables->min_sample_time = DEFAULT_MIN_SAMPLE_TIME;
 			tunables->timer_rate = DEFAULT_TIMER_RATE;
-			tunables->boostpulse_duration_val = DEFAULT_MIN_SAMPLE_TIME;
+			tunables->boostpulse_duration_val = 120 * USEC_PER_MSEC;
 			tunables->timer_slack_val = DEFAULT_TIMER_SLACK;
+			tunables->io_is_busy = 1;
 #ifdef CONFIG_EXYNOS_WD_DVFS
 			tunables->wd_boundary = DEFAULT_WD_BOUNDARY;
 #endif
@@ -1409,8 +1423,13 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 		mutex_lock(&gov_lock);
 
 		freq_table = cpufreq_frequency_get_table(policy->cpu);
-		if (!tunables->hispeed_freq)
-			tunables->hispeed_freq = policy->max;
+		if (!tunables->hispeed_freq) {
+			if (policy->max == 1560000)
+				tunables->hispeed_freq = 1500000;
+			else if (policy->max == 1350000)
+				tunables->hispeed_freq = 1300000;
+		}
+			/* tunables->hispeed_freq = policy->max; */
 
 		for_each_cpu(j, policy->cpus) {
 			pcpu = &per_cpu(cpuinfo, j);

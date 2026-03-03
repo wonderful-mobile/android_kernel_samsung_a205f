@@ -158,7 +158,7 @@
 #define EXYNOS_TMU_NUM_PROBE_MASK		(0x7)
 
 #define TOTAL_SENSORS	8
-#define DEFAULT_BALANCE_OFFSET	20
+#define DEFAULT_BALANCE_OFFSET 80
 
 static bool suspended;
 static bool is_cpu_hotplugged_out;
@@ -1207,7 +1207,7 @@ static int exynos8895_tmu_read(struct exynos_tmu_data *data)
 			case BALANCE:
 				if (data->sensor_info[i].sensor_num != 0) {
 					if (temp_cel >= data->balance_offset)
-						temp_cel = temp_cel - data->balance_offset;
+						temp_cel = temp_cel - (data->balance_offset / 2);
 					else
 						temp_cel = 0;
 				}
@@ -1442,20 +1442,21 @@ static int exynos_map_dt_data(struct platform_device *pdev)
 	}
 
 	data->balance_offset = DEFAULT_BALANCE_OFFSET;
+	data->hotplug_enable = false;
 
-	data->hotplug_enable = of_property_read_bool(pdev->dev.of_node, "hotplug_enable");
-	if (data->hotplug_enable) {
-		dev_info(&pdev->dev, "thermal zone use hotplug function \n");
-		of_property_read_u32(pdev->dev.of_node, "hotplug_in_threshold",
-					&data->hotplug_in_threshold);
-		if (!data->hotplug_in_threshold)
-			dev_err(&pdev->dev, "No input hotplug_in_threshold \n");
+	// data->hotplug_enable = of_property_read_bool(pdev->dev.of_node, "hotplug_enable");
+	// if (data->hotplug_enable) {
+	// 	dev_info(&pdev->dev, "thermal zone use hotplug function \n");
+	// 	of_property_read_u32(pdev->dev.of_node, "hotplug_in_threshold",
+	// 				&data->hotplug_in_threshold);
+	// 	if (!data->hotplug_in_threshold)
+	// 		dev_err(&pdev->dev, "No input hotplug_in_threshold \n");
 
-		of_property_read_u32(pdev->dev.of_node, "hotplug_out_threshold",
-					&data->hotplug_out_threshold);
-		if (!data->hotplug_out_threshold)
-			dev_err(&pdev->dev, "No input hotplug_out_threshold \n");
-	}
+	// 	of_property_read_u32(pdev->dev.of_node, "hotplug_out_threshold",
+	// 				&data->hotplug_out_threshold);
+	// 	if (!data->hotplug_out_threshold)
+	// 		dev_err(&pdev->dev, "No input hotplug_out_threshold \n");
+	// }
 
 	pdata = devm_kzalloc(&pdev->dev, sizeof(struct exynos_tmu_platform_data), GFP_KERNEL);
 	if (!pdata)

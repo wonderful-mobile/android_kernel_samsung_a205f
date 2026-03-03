@@ -50,10 +50,10 @@ mkdir -p "$BUILD_DIR"
 # Generate defconfig (only if .config missing)
 if [[ ! -f "$BUILD_DIR/.config" || "$1" == "defconfig" ]]; then
     echo "Generating defconfig..."
-    make O="$BUILD_DIR" ARCH="$ARCH" HOSTCFLAGS="$HOSTCFLAGS" "$DEFCONFIG"
+    make ARCH="$ARCH" HOSTCFLAGS="$HOSTCFLAGS" "$DEFCONFIG"
 
     echo "Preparing kernel..."
-    make O="$BUILD_DIR" ARCH="$ARCH" prepare
+    make ARCH="$ARCH" prepare
 fi
 
 # Build kernel
@@ -64,7 +64,7 @@ LOG_FILE="$EXPORT_DIR/build.log"
 mkdir -p "$EXPORT_DIR"
 
 # First try parallel build
-if ! make -j1 \
+if ! make -j"$JOBS" \
      ARCH="$ARCH" \
      HOSTCFLAGS="$HOSTCFLAGS" \
      LOCALVERSION="$LOCALVERSION" \
