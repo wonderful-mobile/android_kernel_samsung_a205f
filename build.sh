@@ -8,7 +8,7 @@ DEVICE="A205F"
 DEFCONFIG="exynos7885-a20_defconfig"
 ARCH="arm64"
 JOBS="$(nproc)"
-BUILD_DIR="$(pwd)/out/build"
+BUILD_DIR="$(pwd)"
 EXPORT_DIR="$(pwd)/out"
 HOSTCFLAGS="-fcommon"
 # ---------------------
@@ -38,7 +38,7 @@ echo ""
 # Clean
 if [[ "$1" == "clean" ]]; then
     echo "Cleaning build directory..."
-    rm -rf "$BUILD_DIR"
+#    rm -rf "$BUILD_DIR"
     rm -rf "$EXPORT_DIR"
     echo "Clean complete."
     exit 0
@@ -65,7 +65,6 @@ mkdir -p "$EXPORT_DIR"
 
 # First try parallel build
 if ! make -j1 \
-     O="$BUILD_DIR" \
      ARCH="$ARCH" \
      HOSTCFLAGS="$HOSTCFLAGS" \
      LOCALVERSION="$LOCALVERSION" \
@@ -76,7 +75,6 @@ if ! make -j1 \
     echo ""
 
     make -j1 \
-         O="$BUILD_DIR" \
          ARCH="$ARCH" \
          HOSTCFLAGS="$HOSTCFLAGS" \
          LOCALVERSION="$LOCALVERSION"
