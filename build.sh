@@ -3,7 +3,7 @@
 set -e
 
 # ---- User Config ----
-PROJECT_VERSION="1.0"
+PROJECT_VERSION="0.1-exp"
 DEVICE="A205F"
 DEFCONFIG="exynos7885-a20_defconfig"
 ARCH="arm64"
@@ -11,6 +11,7 @@ JOBS="$(nproc)"
 BUILD_DIR="$(pwd)"
 EXPORT_DIR="$(pwd)/out"
 HOSTCFLAGS="-fcommon"
+VARIENT="vanilla"
 # ---------------------
 
 DATE="$(date +"%Y-%m-%d_%H-%M-%S")"
@@ -23,12 +24,16 @@ export ANDROID_PLATFORM_VERSION=11
 export PLATFORM_VERSION=11
 
 export CROSS_COMPILE=$(pwd)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
-export LOCALVERSION="-Wonderful-${PROJECT_VERSION}-${DEVICE}"
+export LOCALVERSION="-Wonderful-${PROJECT_VERSION}-${VARIENT}"
+export KBUILD_BUILD_USER="mrrpmeowfury"
+export KBUILD_BUILD_HOST="$HOSTNAME"
+export DEVICE="a20"
+export DEVICE_ID="A205F"
 # ---------------------
 
 echo ""
 echo "===== Building Wonderful Kernel ====="
-echo "Version: Wonderful-${PROJECT_VERSION}-${DEVICE}"
+echo "Version: Wonderful-${PROJECT_VERSION}-${VARIENT}"
 echo "Defconfig: $DEFCONFIG"
 echo "Jobs: $JOBS"
 echo "Build dir: $BUILD_DIR"
