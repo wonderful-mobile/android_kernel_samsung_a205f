@@ -23,12 +23,24 @@ export ANDROID_MAJOR_VERSION=11
 export ANDROID_PLATFORM_VERSION=11
 export PLATFORM_VERSION=11
 
-export CROSS_COMPILE=$(pwd)/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
 export LOCALVERSION="-Wonderful-${PROJECT_VERSION}-${VARIENT}"
 export KBUILD_BUILD_USER="mrrpmeowfury"
 export KBUILD_BUILD_HOST="$HOSTNAME"
 export DEVICE="a20"
 export DEVICE_ID="A205F"
+
+# toolchain
+export LD=aarch64-linux-gnu-ld.bfd 
+export AR=aarch64-linux-gnu-ar
+export RANLIB=aarch64-linux-gnu-ranlib
+export NM=aarch64-linux-gnu-nm
+export OBJCOPY=aarch64-linux-gnu-objcopy
+export OBJDUMP=aarch64-linux-gnu-objdump
+export STRIP=aarch64-linux-gnu-strip
+export PATH=$(pwd)/toolchain/clang-`echo $CLANG_VERSION`/bin:$PATH
+export CROSS_COMPILE=$(pwd)/toolchain/google/bin/aarch64-linux-android-
+CLANG_VERSION=r416183b && echo "CLANG_VERSION=$CLANG_VERSION"
+export CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y
 # ---------------------
 
 echo ""
