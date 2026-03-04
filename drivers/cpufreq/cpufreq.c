@@ -705,6 +705,9 @@ static ssize_t store_##file_name					\
 	ret = sscanf(buf, "%u", &new_policy.object);			\
 	if (ret != 1)							\
 		return -EINVAL;						\
+	if (&policy->object == &policy->max)	\
+		if (val < policy->min)				\
+			val = policy->min;				\
 									\
 	temp = new_policy.object;					\
 	ret = cpufreq_set_policy(policy, &new_policy);		\
