@@ -8,14 +8,14 @@ DEVICE="A205F"
 DEFCONFIG="exynos7885-a20_defconfig"
 ARCH="arm64"
 JOBS="$(nproc)"
-BUILD_DIR="$(pwd)/out/build"
+#BUILD_DIR="$(pwd)/out/build"
 EXPORT_DIR="$(pwd)/out"
 HOSTCFLAGS="-fcommon"
 VARIENT="vanilla"
 # ---------------------
 
 DATE="$(date +"%Y-%m-%d_%H-%M-%S")"
-IMAGE_SOURCE="$BUILD_DIR/arch/arm64/boot/Image"
+IMAGE_SOURCE="./arch/arm64/boot/Image"
 FINAL_IMAGE="$EXPORT_DIR/kernel-${DATE}"
 
 # ---- Environment ----
@@ -24,7 +24,7 @@ export ANDROID_PLATFORM_VERSION=11
 export PLATFORM_VERSION=11
 
 export LOCALVERSION="-Wonderful-${PROJECT_VERSION}-${VARIENT}"
-export KBUILD_BUILD_USER="mrrpmeowfury"
+export KBUILD_BUILD_USER="$(whoami)"
 export KBUILD_BUILD_HOST="$HOSTNAME"
 export DEVICE="a20"
 export DEVICE_ID="A205F"
@@ -48,7 +48,7 @@ echo "===== Building Wonderful Kernel ====="
 echo "Version: Wonderful-${PROJECT_VERSION}-${VARIENT}"
 echo "Defconfig: $DEFCONFIG"
 echo "Jobs: $JOBS"
-echo "Build dir: $BUILD_DIR"
+echo "Build dir: $PWD"
 echo "======================================"
 echo ""
 
@@ -74,16 +74,13 @@ if [[ "$1" == "menuconfig" ]]; then
     exit 0
 fi
 
-# Create build directory
-mkdir -p "$BUILD_DIR"
-
 # Generate defconfig (only if .config missing)
-if [[ ! -f "$BUILD_DIR/.config" || "$1" == "defconfig" ]]; then
+if [[ ! -f "./.config" || "$1" == "defconfig" ]]; then
     echo "Generating defconfig..."
-    make O="$BUILD_DIR" ARCH="$ARCH" HOSTCFLAGS="$HOSTCFLAGS" "$DEFCONFIG"
+    make ARCH="$ARCH" HOSTCFLAGS="$HOSTCFLAGS" "$DEFCONFIG"
 
     echo "Preparing kernel..."
-    make O="$BUILD_DIR" ARCH="$ARCH" prepare
+    make ARCH="$ARCH" prepare
 fi
 
 # Build kernel
@@ -95,7 +92,6 @@ mkdir -p "$EXPORT_DIR"
 
 # First try parallel build
 if ! make -j"$JOBS" \
-     O="$BUILD_DIR" \
      ARCH="$ARCH" \
      HOSTCFLAGS="$HOSTCFLAGS" \
      LOCALVERSION="$LOCALVERSION" \
@@ -106,7 +102,6 @@ if ! make -j"$JOBS" \
     echo ""
 
     make -j1 \
-         O="$BUILD_DIR" \
          ARCH="$ARCH" \
          HOSTCFLAGS="$HOSTCFLAGS" \
          LOCALVERSION="$LOCALVERSION"
