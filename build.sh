@@ -83,6 +83,11 @@ if [[ ! -f "./.config" || "$1" == "defconfig" ]]; then
     make ARCH="$ARCH" prepare
 fi
 
+if [[ "$1" == "savedefconfig" ]]; then
+    echo "Saving defconfig..."
+    make savedefconfig
+fi
+
 # Build kernel
 echo "Starting build..."
 echo ""
@@ -93,6 +98,9 @@ mkdir -p "$EXPORT_DIR"
 # First try parallel build
 if ! make -j"$JOBS" \
      ARCH="$ARCH" \
+     CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y \
+     CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y \
+     CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y \
      HOSTCFLAGS="$HOSTCFLAGS" \
      LOCALVERSION="$LOCALVERSION" \
      2>&1 | tee "$LOG_FILE"; then
@@ -103,6 +111,9 @@ if ! make -j"$JOBS" \
 
     make -j1 \
          ARCH="$ARCH" \
+         CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y \
+         CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3=y \
+         CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y \
          HOSTCFLAGS="$HOSTCFLAGS" \
          LOCALVERSION="$LOCALVERSION"
 fi
