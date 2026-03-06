@@ -11,7 +11,7 @@ JOBS="$(nproc)"
 #BUILD_DIR="$(pwd)/out/build"
 EXPORT_DIR="$(pwd)/out"
 HOSTCFLAGS="-fcommon"
-VARIENT="vanilla"
+VARIENT="ksu"
 # ---------------------
 
 DATE="$(date +"%Y-%m-%d_%H-%M-%S")"
