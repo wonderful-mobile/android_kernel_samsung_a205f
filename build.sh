@@ -8,15 +8,16 @@ DEVICE="A205F"
 DEFCONFIG="exynos7885-a20_defconfig"
 ARCH="arm64"
 JOBS="$(nproc)"
-#BUILD_DIR="$(pwd)/out/build"
 EXPORT_DIR="$(pwd)/out"
 HOSTCFLAGS="-fcommon"
 VARIENT="vanilla"
+ANYKERNEL_DIR="$(pwd)/AnyKernel3"
 # ---------------------
 
 DATE="$(date +"%Y-%m-%d_%H-%M-%S")"
 IMAGE_SOURCE="./arch/arm64/boot/Image"
-FINAL_IMAGE="$EXPORT_DIR/kernel-${DATE}"
+FINAL_IMAGE="$EXPORT_DIR/Image"
+ZIP_NAME="WonderfulKernel-${DEVICE}-${PROJECT_VERSION}-${DATE}.zip"
 
 # ---- Environment ----
 export ANDROID_MAJOR_VERSION=11
@@ -25,7 +26,7 @@ export PLATFORM_VERSION=11
 
 export LOCALVERSION="-Wonderful-${PROJECT_VERSION}-${VARIENT}"
 export KBUILD_BUILD_USER="$(whoami)"
-export KBUILD_BUILD_HOST="$HOSTNAME"
+export KBUILD_BUILD_HOST="angel"
 export DEVICE="a20"
 export DEVICE_ID="A205F"
 
@@ -128,9 +129,21 @@ fi
 mkdir -p "$EXPORT_DIR"
 cp "$IMAGE_SOURCE" "$FINAL_IMAGE"
 
+# Package AnyKernel3 zip
+if [[ -d "$ANYKERNEL_DIR" ]]; then
+    cp "$IMAGE_SOURCE" "$ANYKERNEL_DIR/Image"
+    cd "$ANYKERNEL_DIR"
+    zip -r9 "$EXPORT_DIR/$ZIP_NAME" * -x "*.git*" "*.zip" > /dev/null
+    cd - > /dev/null
+fi
+
 echo ""
 echo "Build successful!"
 echo "Exported to:"
 echo "$FINAL_IMAGE"
+if [[ -f "$EXPORT_DIR/$ZIP_NAME" ]]; then
+    echo "Flashable zip:"
+    echo "$EXPORT_DIR/$ZIP_NAME"
+fi
 echo ""
 echo "Done."
