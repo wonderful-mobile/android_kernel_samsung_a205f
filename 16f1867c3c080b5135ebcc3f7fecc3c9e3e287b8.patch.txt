@@ -1,0 +1,22 @@
+From 16f1867c3c080b5135ebcc3f7fecc3c9e3e287b8 Mon Sep 17 00:00:00 2001
+From: mrrpmeowfurry <velocity.toml@proton.me>
+Date: Sun, 15 Mar 2026 21:23:13 +0700
+Subject: [PATCH] lz4
+
+---
+ drivers/block/zram/zram_drv.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/block/zram/zram_drv.c b/drivers/block/zram/zram_drv.c
+index f82b3704b..f7d45e3b2 100755
+--- a/drivers/block/zram/zram_drv.c
++++ b/drivers/block/zram/zram_drv.c
+@@ -48,7 +48,7 @@ static const char *default_compressor = "zstd";
+ #elif IS_ENABLED(CONFIG_CRYPTO_LZ4)
+ static const char *default_compressor = "lz4";
+ #else
+-static const char *default_compressor = "lzo";
++static const char *default_compressor = "lz4";
+ #endif
+ 
+ /* Module params (documentation at end) */
